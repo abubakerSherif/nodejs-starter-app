@@ -12,10 +12,7 @@ class Orders {
                 length: 6,
               });
               order.code = code;
-              console.log(order);
             const result = await OrdersModel.create(order);
-            console.log(result);
-
             return result;
         } catch (error) {
             console.log(error);

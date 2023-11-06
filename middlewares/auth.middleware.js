@@ -5,28 +5,6 @@ const { UNAUTHORIZED } = require('../errorDefinition/errors.map');
 class AuthMiddleware {
     static async authorize(req, res, next) {
         const token = req.headers['x-auth'];
-        let lang = req.header('languageid');
-        if (lang) {
-            switch (lang) {
-                case '1':
-                    global.currentLang  = 'en-US';
-                    break;
-                case '2':
-                    global.currentLang  = 'ms';
-                    break;
-                case '3':
-                    global.currentLang  = 'zh-Hans';
-                    break;
-                case '4':
-                    global.currentLang  = 'zh-Hant';
-                    break;    
-                default:
-                    global.currentLang  = 'en-US';
-                    break;        
-            }
-        } else {
-            global.currentLang = 'en-US';
-        }
 
         try {
             const user = await tokenHelper.verify(token);
@@ -78,25 +56,6 @@ class AuthMiddleware {
        
     }
 
-    static mapAccessCodeToMeaningfull(accessCode) {
-        if (!accessCode) {
-            return;
-        }
-        switch (accessCode[accessCode.length - 1]) {
-            case '0':
-                return 'create';
-            case '1':
-                return 'read';
-            case '2':
-                return 'update';
-            case '3':
-                return 'delete';
-            case '9':
-                return 'admin';
-            default:
-                return accessCode;
-        }
-    }
 }
 
 module.exports = AuthMiddleware;

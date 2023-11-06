@@ -6,7 +6,6 @@ class RequestBodyValidatorMiddleware {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log(errors.array());
-            
             return res.sendError('0006', req.header('languageId'), null, errors.array());
         }
         if (req.body.order) {
@@ -16,5 +15,4 @@ class RequestBodyValidatorMiddleware {
         next();
     }
 }
-
 module.exports = RequestBodyValidatorMiddleware;
