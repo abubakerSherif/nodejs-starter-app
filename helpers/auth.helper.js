@@ -1,12 +1,6 @@
 const token = require('./token.helper');
 const {
-    BARCODE_EXSIST,
     EMAIL_PHONE_EXSIST,
-    WECHAT_API_CALL_ERROR,
-    USER_NOT_FOUND,
-    WGO_USER_ACCOUNT_EXPIRED,
-    APPROVAL_WAIT,
-    THIS_WECHAT_ACCOUNT_ALREADY_REGISTERED,
 } = require('../errorDefinition/errors.map');
 const http = require('axios').default;
 
@@ -88,14 +82,8 @@ class Auth {
             console.log('auth helper error:',error);
             
             throw error
-        }
-        
+        }   
     }
-
-
-
-
-
 }
 
 module.exports = Auth;

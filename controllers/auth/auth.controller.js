@@ -7,18 +7,8 @@ const moment = require("moment");
 const { validationResult } = require("express-validator");
 const validator = require("validator");
 const userProfileModule = require('../../models/users/userProfile.model');
-
 const {
-  BARCODE_EXSIST,
-  EMAIL_PHONE_EXSIST,
   USER_NOT_FOUND,
-  USERNAME_LENGTH_SMALL,
-  OTP_NOT_FOUND,
-  PASSWORD_NO_MATCH,
-  UNABLE_TO_VERIFY_EMAIL,
-  NO_EMAIL,
-  INVALID_TOKEN,
-  USER_ALREADY_VERIFIED,
 } = require("../../errorDefinition/errors.map");
 
 // Helpers
@@ -30,7 +20,6 @@ const response = require("../../helpers/response.helper");
 const isEmpty = require("lodash/isEmpty");
 // const TokenHelper = require("../../helpers/token.helper");
 const AuthHelper = require("../../helpers/auth.helper");
-// const MessageResponse = require("../../helpers/languageTextUtil.helper");
 
 class Auth {
   /**

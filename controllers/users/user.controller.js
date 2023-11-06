@@ -10,7 +10,6 @@ const crypto = require('crypto');
 const isEmpty = require('lodash/isEmpty');
 const WGOaccessCheck = require('../../helpers/utils.helper').WGOaccessCheck;
 const Email = require('../../helpers/email.helper');
-const MessageResponse = require("../../helpers/languageTextUtil.helper");
 const BinMember = require("../../models/groups/bin.member.model");
 const { BinInformation } = require("../../models/bin/binInformation");
 

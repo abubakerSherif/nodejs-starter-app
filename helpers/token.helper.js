@@ -8,7 +8,6 @@ const userProfile = require('../models/users/userProfile.model');
 const tokenAge = process.env.TOKEN_AGE;
 const secretKey = process.env.SECRET_KEY;
 const maxTokens = process.env.MAX_NUMBER_OF_TOKENS;
-const codeError = require('./codeError.helper');
 const { TOKEN_EXPIRED, INVALID_TOKEN } = require('../errorDefinition/errors.map');
 
 class Token {
@@ -117,7 +116,7 @@ class Token {
 
     static async generateRefreshToken() {
         const refreshToken = jwt.sign({}, secretKey, { expiresIn: '7d' });
-        
+
         return refreshToken;
     }
 }

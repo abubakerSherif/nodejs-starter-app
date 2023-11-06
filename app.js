@@ -13,7 +13,6 @@ const logRequestBody = require("./middlewares/logRequestBody.middleware");
 const apiRouter = require("./routes/api.routes");
 const Response = require("./classes/response");
 const ErrorHelper = require("./helpers/error.helper");
-const SuccessHelper = require("./helpers/languageTextUtil.helper");
 
 // Internal files
 const apiVersion = process.env.API_VERSION;

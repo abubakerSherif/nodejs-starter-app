@@ -4,7 +4,6 @@
 
 const userProfileModule = require('../models/users/userProfile.model');
 const { isset } = require('../helpers/utils.helper');
-
 const {
     INPUT_OLD_PASSWORD,
     INPUT_NEW_PASSWORD,
@@ -12,99 +11,15 @@ const {
     WRONG_PASSWORD,
     OLD_PASSWORD_EQUALS_NEW,
     PASSWORD_NO_MATCH,
-    NO_VERIFIED_OR_SUBSCRIBED,
-    OTP_DUPLICATED,
-    USER_NOT_FOUND,
-    BARCODE_EXSIST,
-    ERROR_IN_BODY
 } = require('../errorDefinition/errors.map');
-const amapGaodeApiKey = process.env.AMAP_GAODE_KEY
 const geocodingMapApiKey = process.env.GEOCODING_MAP_API_KEY
-const IOWT_CHINA = process.env.IOWT_CHINA
 const utils = require('./utils.helper');
-const WGOaccessCheck = require('./utils.helper').WGOaccessCheck;
-const validate = require("validate.js");
 const bcrypt = require('bcrypt-nodejs');
 const isEmpty = require('lodash/isEmpty');
 const compact = require('lodash/compact');
 const uniq = require('lodash/uniq');
 const ObjectId = require('mongoose').Types.ObjectId;
-const MessageResponse = require("../helpers/languageTextUtil.helper");
 class User {
-    static async findByCountry(country) {
-        return await userProfileModule.UserProfile.find({
-            'location.coutry': country
-        });
-    }
-
-    static async findByPostcode(postcode) {
-        return await userProfileModule.UserProfile.find({
-            'location.postcode': postcode
-        });
-    }
-
-
-    static async findValidRecipients(recipients = []) {
-
-        let query = {
-            is_email_verified: true,
-            is_email_subscribed: true
-        };
-        if (recipients.length) {
-            query.email = { $in: recipients };
-        }
-
-        const emailArrayObj = await userProfileModule.UserProfile.find(
-            query,
-            ["email", "username"]
-        );
-        if (emailArrayObj.length < 1) {
-            throw NO_VERIFIED_OR_SUBSCRIBED
-        }
-        return emailArrayObj;
-      }
-
-      static async findValidRecipientsForSms(recipients = []) {
-
-        let query = {
-            is_phone_verified: true
-        };
-        if (recipients.length) {
-            query.email = { $in: recipients };
-        }
-
-        const users = await userProfileModule.UserProfile.find(
-            query,
-            ["phone", "uid"]
-        );
-        if (users.length < 1) {
-            throw NO_VERIFIED_OR_SUBSCRIBED
-        }
-        return users;
-      }
-
-      static async findUsersWithPostCode(postcode) {
-
-        let query = {
-            is_email_verified: true,
-            is_email_subscribed: true,
-            'location.postcode': {
-                $regex: postcode,
-                $options: 'xi'
-            }
-        };
-
-        const emailArrayObj = await userProfileModule.UserProfile.find(
-            query,
-            ["email", "username", "uid"]
-        );
-
-        if (emailArrayObj.length < 1) {
-            throw NO_VERIFIED_OR_SUBSCRIBED
-        }
-        return emailArrayObj;
-      }
-
 
     static async findByEmail(email, password) {
         let result;
@@ -214,18 +129,6 @@ class User {
             return null;
         } catch (e) {
             throw e;
-        }
-    }
-
-    static async getUserInfos(userInfo) {
-        try {
-            let result = await userProfileModule.UserProfile.find({
-                _id: { $in: userInfo }
-            },['phone','email','country_code']).limit(25);
-
-            return result
-        } catch (error) {
-            throw error;
         }
     }
 
@@ -401,63 +304,6 @@ class User {
         }
     }
 
-    static async getUserIfExist({ email = '', phone = '' }) {
-        try {
-            email = email.trim().toLowerCase();
-
-            phone = phone.replace(/\D/g, '');
-
-            const queryIndicator = phone.substr(phone.length - 8);
-
-            const regexFactor = '' + queryIndicator + '$';
-
-            let user;
-
-            if (email) {
-                user = await userProfileModule.UserProfile.findOne({ email });
-            } else {
-                user = await userProfileModule.UserProfile.findOne({
-                    phone: {
-                        $regex: regexFactor
-                    }
-                });
-            }
-
-            if (!user) {
-                return false;
-            }
-
-            return user;
-        } catch (e) {
-            // @TODO log the error
-            console.log(e);
-            throw e;
-        }
-    }
-
-    static async getUserByPhone(phone) {
-        try {
-            if (!phone) {
-                return false
-            }
-
-            let user = await userProfileModule.UserProfile.findOne({
-                    phone: phone
-                });
-
-
-            if (!user) {
-                return false;
-            }
-
-            return user;
-        } catch (e) {
-            // @TODO log the error
-            console.log(e);
-            throw e;
-        }
-    }
-
     static async create(request, password) {
         try {
 
@@ -500,41 +346,6 @@ class User {
 
             if (result) {
                 return result;
-            }
-            return null;
-        } catch (e) {
-            throw e;
-        }
-    }
-
-    static async findUserForLeaderboard(uid) {
-        let result;
-        try {
-            result = await userProfileModule.UserProfile.findOne({
-                uid
-            });
-
-            if (result) {
-                return result;
-            }
-            return null;
-        } catch (e) {
-            throw e;
-        }
-    }
-
-    static async authorizeById(_id,password) {
-        let result;
-        try {
-            result = await userProfileModule.UserProfile.findOne({
-                _id: _id
-            },'password');
-
-            if (result) {
-                if (bcrypt.compareSync(password, result.password)) {
-                    return result;
-                }
-                return null;
             }
             return null;
         } catch (e) {
@@ -588,144 +399,6 @@ class User {
             throw e;
         }
     }
-
-    static async removeAccessCode(uid, access_code) {
-        try {
-            const result = await userProfileModule.UserProfile.updateOne(
-                { uid },
-                {
-                    $pull: {
-                        extra_access_codes: access_code
-                    }
-                }
-            );
-
-            return result;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async findUIDById(_id) {
-        let result;
-        try {
-            result = await userProfileModule.UserProfile.findOne({
-                _id: _id
-            });
-
-            if (result) {
-                return result.uid;
-            }
-            return null;
-        } catch (e) {
-            throw e;
-        }
-    }
-
-    static async findMembersById(members) {
-        try {
-            let validMembers = await userProfileModule.UserProfile.find({
-                uid: {
-                    $in: members
-                }
-            });
-
-            return validMembers;
-        } catch (e) {
-            throw e;
-        }
-    }
-
-    static async getByEmail(email) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                email
-            });
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getByPhone(phone) {
-        phone = phone.replace(/\D/g, '');
-
-        if (phone.length < 8) {
-            return null;
-        }
-
-        const queryIndicator = phone.substr(phone.length - 8);
-        const regexFactor = '' + queryIndicator + '$';
-
-        const result = await userProfileModule.UserProfile.findOne({ phone: RegExp(regexFactor)});
-
-        return result;
-    }
-
-    static async getEmailActivationToken (email_validation_token) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                email_validation_token
-            });
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getByResetPasswordToken(reset_password_token) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                reset_password_token,
-                reset_password_token_expire_at: {
-                    $gt: new Date()
-                }
-            });
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getByUpdateAddressToken(update_address_token) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                update_address_token,
-                update_address_token_expire_at: {
-                    $gt: new Date()
-                }
-            });
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getByActivationEmailToken(email_validation_token) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                email_validation_token
-                // reset_password_token_expire_at: {
-                //     $gt: new Date()
-                // }
-            });
-            return user;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // static async getUsers(options) {
-    //     try {
-    //         if (options.isAdmin) {
-    //             return this.getAllUsers(options);
-    //         }
-
-    //         return this.getUsersByBins(options);
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
 
     static async getUsers({
         sort,
@@ -800,22 +473,6 @@ class User {
             }
             return result;
             
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getUsersbyCountry(code) {
-        try {
-            const query = await userProfileModule.UserProfile.aggregate()
-            .match({country_code : code})
-            .project({
-                country_code: 1,
-                phone: 1,
-                is_phone_verified: 1,
-                uid: 1,
-            });
-            return query;
         } catch (error) {
             throw error;
         }
@@ -937,86 +594,6 @@ class User {
         }
     }
 
-    static async getAllUsersFilter(query) {
-        try {
-            let result = await userProfileModule.UserProfile.find({
-                $or: [
-                    {
-                        username: {
-                            $regex: query
-                        }
-                    },
-                    {
-                        uid: {
-                            $regex: query
-                        }
-                    }
-                ]
-            }).limit(50);
-
-            return result;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getUserAccessCodes(uid) {
-        try {
-            const result = await userProfileModule.UserProfile.aggregate()
-                .match({ uid })
-                .lookup({
-                    from: 'user_types',
-                    localField: 'user_type',
-                    foreignField: 'user_type',
-                    as: 'user_type'
-                })
-                .unwind('user_type')
-                .project({
-                    _id: 0,
-                    access_codes: {
-                        $concatArrays: [
-                            '$user_type.access_codes',
-                            {
-                                $ifNull: ['$extra_access_codes', []]
-                            }
-                        ]
-                    }
-                })
-                .lookup({
-                    from: 'access_codes',
-                    localField: 'access_codes',
-                    foreignField: 'code',
-                    as: 'access_codes'
-                });
-
-            return result[0].access_codes;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getUserType(uid) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                uid
-            });
-            return user.user_type;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async getUserCountry(uid) {
-        try {
-            const user = await userProfileModule.UserProfile.findOne({
-                uid
-            });
-            return user.country_code || null;
-        } catch (error) {
-            throw error;
-        }
-    }
-
     static async getUserByToken(token) {
         const user = await userProfileModule.UserProfile.aggregate()
             .match({ 'tokens.token': token })
@@ -1049,78 +626,7 @@ class User {
         return user[0];
     }
 
-    /**
-     *
-     * @param {Array<String>} uids
-     */
-    static async filterUidsIfExist(uids = []) {
-        try {
-            const existUids = [];
 
-            for (const uid of uids) {
-                if (await User.findByUid(uid)) {
-                    existUids.push(uid);
-                }
-            }
-
-            return existUids;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    static async findByOTP(otp) {
-        const users = await userProfileModule.UserProfile.find({ 'otps.otp': otp });
-
-        if (users.length > 1) {
-            this.deleteUserOTP(otp);
-            throw OTP_DUPLICATED;
-        }
-        return users[0];
-    }
-
-    static async deleteUserOTP(otp) {
-        if (!otp) {
-            return;
-        }
-        const result = await userProfileModule.UserProfile.updateMany(
-            {
-                'otps.otp': otp,
-            },
-            { $pull: { otps: { otp: otp } } },
-        );
-
-        return result;
-    }
-
-    static async deleteAllUserOTP(uid) {
-        if (!uid) {
-            return;
-        }
-
-        const result = await userProfileModule.UserProfile.updateOne({ uid }, {
-            $unset: { otps: [] }
-        });
-
-        return result;
-    }
-
-
-    static censorEmailName(str) {
-        return str[0] + str[1] + "*".repeat(str.length - 2);
-    }
-    static censorDomain(str) {
-        var arr = str.split(".");
-        var arr2 = arr[arr.length - 1];
-        return "*".repeat(str.length - 1 - arr2.length) + '.' + arr2;
-    }
-    static censorEmail(email) {
-        var arr = email.split("@");
-        return this.censorEmailName(arr[0]) + "@" + this.censorDomain(arr[1]);
-    }
-    static censorPhone(phone) {
-        return phone[0] + phone[1] + phone[2] + "*".repeat(phone.length - 5) + phone.slice(-2);
-    }
 
 }
 
