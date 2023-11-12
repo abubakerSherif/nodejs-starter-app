@@ -1,12 +1,10 @@
 const OrdersHelper = require('../../helpers/orders.helper');
 const omit = require('lodash/omit');
-const { ITEM_NOT_FOUND} = require('../../errorDefinition/errors.map');
 const pick = require('lodash/pick');
-
+const {NOT_FOUND} = require("../../errorDefinition/errors.map");
 class OrdersController {
 
     static async index(req, res) {
-        console.log(req.query);
         try {
 
             const options = {
@@ -21,10 +19,7 @@ class OrdersController {
                 clientKey: req.header('Client-key'),
                 page: req.query.page
             }
-            console.log(options);
             const items = await OrdersHelper.getOrders(options);
-            console.log(items);
-
             return res.sendSuccess(items);
         } catch (error) {
             console.log(error);
@@ -47,6 +42,45 @@ class OrdersController {
             res.sendError(error, req.header('languageId'), null, error);
         }
     }
+
+
+    static async update(req, res) {
+        try {
+            const order_id = req.params.id;
+            let order = await OrdersHelper.findById({ _id:order_id });
+            order = await OrdersHelper.update(
+                {   
+                    _id:order_id,
+                    body:req.body 
+                }
+                ,{ new: true }
+            );    
+            res.sendSuccess(order);
+        } catch (error) {
+            console.log(error);
+            res.sendError(error, req.header('languageId'));
+        }
+    }
+
+    static async delete(req, res) {
+        try {
+            const order_id = req.params.id;
+            let order = await OrdersHelper.findById({ _id:order_id });
+            if (!order) {
+                throw NOT_FOUND; 
+            }
+            order = await OrdersHelper.delete(
+                {   
+                    _id:order_id
+                }
+            );    
+            res.sendSuccess(order);
+        } catch (error) {
+            console.log(error);
+            res.sendError(error, req.header('languageId'));
+        }
+    }
+
 
 
 }

@@ -92,6 +92,17 @@ class Auth {
     }
 }
 
+
+static async show(req, res) {
+  try {
+      const users = await userHelper.findByUid(req.params.id);
+      return res.sendSuccess(users);
+  } catch (error) {
+      console.log(error);
+      res.sendError(error, req.header('languageId'), '', error);
+  }
+}
+
   static async signinByToken(req, res) {
     try {
       const user = await userHelper.getUserByToken(req.headers["x-auth"]);

@@ -48,8 +48,6 @@ class Orders {
 
             .match(aggregateQuery);
             
-            console.log(query);
-
             // Date
             // if (fromDate && toDate) {
             //     query.match({
@@ -122,6 +120,46 @@ class Orders {
         }
     }
 
+
+    static async findById(_id) {
+        let result;
+        try {
+            result = await OrdersModel.findOne({
+                _id: _id
+            });
+
+            if (result) {
+                return result;
+            }
+            return null;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+
+    static async update({
+        _id,
+        body,
+    }) {
+        try {
+            const result = await OrdersModel.findOneAndUpdate({ _id: _id }, { $set: body }, { returnOriginal: false });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    static async delete({
+        _id
+    }) {
+        try {
+            const result = await OrdersModel.deleteOne({ _id: _id });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
    
 }
 

@@ -66,11 +66,25 @@ router.get(
   authController.index
 );
 
+router.get(
+  "/user/:id",
+  // clientKey.clientKey,
+  // authMiddleware.authorize,
+  authController.show
+);
+
 router.post(
   "/news",
   // clientKey.clientKey,
   // authMiddleware.authorize,
   newsController.create
+);
+
+router.patch(
+  "/news/:id",
+  // clientKey.clientKey,
+  // authMiddleware.authorize,
+  newsController.update
 );
 
 router.get(
@@ -80,12 +94,32 @@ router.get(
   newsController.index
 );
 
+router.delete(
+  "/news/:id",
+  // clientKey.clientKey,
+  // authMiddleware.authorize,
+  newsController.delete
+);
 
 router.post(
   "/orders",
   // clientKey.clientKey,
   // authMiddleware.authorize,
   ordersController.create
+);
+
+router.patch(
+  "/orders/:id",
+  // clientKey.clientKey,
+  // authMiddleware.authorize,
+  ordersController.update
+);
+
+router.delete(
+  "/orders/:id",
+  // clientKey.clientKey,
+  // authMiddleware.authorize,
+  ordersController.delete
 );
 
 router.get(

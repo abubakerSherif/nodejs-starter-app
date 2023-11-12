@@ -7,20 +7,15 @@ class NewsController {
 
     static async index(req, res) {
         try {
-
             const options = {
                 sort: req.query.sort,
                 order: req.query.order,
-                filter: req.query.filter,
-                // fromDate: req.query.fromDate,
-                // toDate: req.query.toDate,
-                // statusFlag: req.query.statusFlag,
+                bodyFilter: req.query.bodyFilter,
+                statusFilter: req.query.statusFilter,
+                titleFilter: req.query.titleFilter,
                 pageSize: req.query.pageSize,
-                // companyTag: req.headers.companytag,
-                // clientKey: req.header('Client-key'),
                 page: req.query.page
             }
-
             const items = await NewsHelper.getItems(options);
 
             return res.sendSuccess(items);
@@ -30,7 +25,24 @@ class NewsController {
         }
     }
 
-    
+    static async delete(req, res) {
+        try {
+            const news_id = req.params.id;
+            let news = await NewsHelper.findById({ _id:news_id });
+            if (!news) {
+                throw NOT_FOUND; 
+            }
+            news = await NewsHelper.delete(
+                {   
+                    _id:news_id
+                }
+            );    
+            res.sendSuccess(news);
+        } catch (error) {
+            console.log(error);
+            res.sendError(error, req.header('languageId'));
+        }
+    }
 
     static async create(req, res) {
         try {
@@ -38,6 +50,24 @@ class NewsController {
             res.sendSuccess(item);
         } catch (error) {
             res.sendError(error, req.header('languageId'), null, error);
+        }
+    }
+
+    static async update(req, res) {
+        try {
+            const news_id = req.params.id;
+            let news = await NewsHelper.findById({ _id:news_id });
+            news = await NewsHelper.update(
+                {   
+                    _id:news_id,
+                    body:req.body 
+                }
+                ,{ new: true }
+            );    
+            res.sendSuccess(news);
+        } catch (error) {
+            console.log(error);
+            res.sendError(error, req.header('languageId'));
         }
     }
 

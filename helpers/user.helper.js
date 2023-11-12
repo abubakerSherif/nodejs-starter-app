@@ -363,12 +363,6 @@ class User {
                     foreignField: 'user_type',
                     as: 'access_codes'
                 })
-                .lookup({
-                    from: 'barcodes',
-                    localField: 'uid',
-                    foreignField: 'uid',
-                    as: 'barcodes'
-                })
                 .unwind('access_codes')
                 .project({
                     uid: 1,
@@ -383,7 +377,6 @@ class User {
                     location: 1,
                     is_email_verified: 1,
                     is_email_subscribed: 1,
-                    barcodes: '$barcodes.barcode',
                     access_codes: {
                         $concatArrays: [
                             '$access_codes.access_codes',

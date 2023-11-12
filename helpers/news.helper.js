@@ -4,24 +4,47 @@ const { INVALID_STATUS_FLAG, GROUP_NOT_FOUND } = require('../errorDefinition/err
 const mongoose = require('mongoose');
 
 class News {
-    
+
+
+    static async findById(_id) {
+        let result;
+        try {
+            result = await NewsModel.findOne({
+                _id: _id
+            });
+
+            if (result) {
+                return result;
+            }
+            return null;
+        } catch (e) {
+            throw e;
+        }
+    }
+
 
     static async update({
         _id,
-        item
+        body,
     }) {
         try {
-            // if (item.status_flag !== 'approved' && item.status_flag !== 'pending') {
-            //     throw INVALID_STATUS_FLAG;
-            // }
-    
-            const result = await ItemModel.findOneAndUpdate({_id: _id}, { $set: item}, {returnNewDocument: true});
+            const result = await NewsModel.findOneAndUpdate({ _id: _id }, { $set: body }, { returnOriginal: false });
             return result;
-        } catch (error) {  
+        } catch (error) {
             throw error;
         }
     }
 
+    static async delete({
+        _id
+    }) {
+        try {
+            const result = await NewsModel.deleteOne({ _id: _id });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     static async create(item) {
         try {
@@ -35,35 +58,28 @@ class News {
     static async getItems({
         sort,
         order,
-        filter,
-        // fromDate,
-        // toDate,
-        // statusFlag,
+        bodyFilter,
+        statusFilter,
+        titleFilter,
         pageSize,
-        // companyTag,
         page,
-        clientKey
     }) {
         try {
             sort = sort || 'created_at';
             order = order || 'desc';
-            filter = filter || '';
-            // statusFlag = statusFlag || 'published';
+            bodyFilter = bodyFilter || ''
+            statusFilter = statusFilter || ''
+            titleFilter = titleFilter || ''
             pageSize = parseInt(pageSize) || 100
             // companyTag = companyTag || '';
             page = page || 1;
-            const startIndex = (page - 1) * pageSize;            
-
-            
-            
+            const startIndex = (page - 1) * pageSize;
             // let aggregateQuery = { display: 1, status_flag : 'approved', company_tag: { $ne: 'TH' } }
-            let aggregateQuery = {  }
+            let aggregateQuery = {}
 
             let query = NewsModel.aggregate()
-            
+                .match(aggregateQuery);
 
-            .match(aggregateQuery);
-            
 
             // // Date
             // if (fromDate && toDate) {
@@ -82,22 +98,40 @@ class News {
             // }
 
 
-            // //filter        
-            if (filter) {
+            // //filter   
+            if (bodyFilter) {
                 query.match({
                     $or: [{
                         title: {
-                            $regex: `${filter}`,
+                            $regex: `${bodyFilter}`,
                             $options: 'xi'
                         }
                     },
                     {
                         body: {
-                            $regex: filter,
+                            $regex: bodyFilter,
                             $options: 'xi'
                         }
                     }
                     ]
+                });
+            }
+
+            if (statusFilter) {
+                query.match({
+                    status: {
+                        $regex: `${statusFilter}`,
+                        $options: 'xi'
+                    }
+                });
+            }
+
+            if (titleFilter) {
+                query.match({
+                    title: {
+                        $regex: `${titleFilter}`,
+                        $options: 'xi'
+                    }
                 });
             }
 
@@ -110,18 +144,18 @@ class News {
                 created_at: true,
                 updated_at: true,
             }).limit(parseInt(pageSize));
-            // sort
-            query.sort({
-                    [sort]: order
-                })
+            // sort
+            query.sort({
+                [sort]: order
+            })
 
-            let result = await query;
+            let result = await query;
 
-            if (result.length < 1) {
-                return result;
-            }
-            return result;
-            
+            if (result.length < 1) {
+                return result;
+            }
+            return result;
+
         } catch (error) {
             throw error;
         }

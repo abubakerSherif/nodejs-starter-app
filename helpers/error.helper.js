@@ -6,7 +6,7 @@ class Error {
 
     if (!message) {
       code = "-1";
-      message = this.getLanguageSpecificErrorMessage(code, languageId);
+      message = code;
     }
 
     if (action) {

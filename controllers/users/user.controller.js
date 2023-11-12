@@ -92,15 +92,6 @@ class UserController {
                     bird_count: user.birds.length
                 };
 
-                if (givenClientKey === 'TR334u993r!_@pp') {
-                    busCo2Saved = await Co2eEmissionsManagementHelper.getTotalCO2SavedforTransportSystem(req.user.uid)
-                    co2e = await Co2eEmissionsManagementHelper.getTotalCO2e(req.user.uid)
-                    let treePic = await  Co2eEmissionsManagementHelper.getTreeGrowth((accumulatedCO2 + parseFloat(busCo2Saved)))
-                    profile.tree_pic = treePic
-                    profile.co2e = co2e
-                    profile.accumulated_CO2 = (accumulatedCO2 + parseFloat(busCo2Saved)).toString()
-
-                }
 
                 return res
                     .status(200)
